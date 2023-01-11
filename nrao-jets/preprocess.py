@@ -37,7 +37,8 @@ def get_jet_images(filename="data/radio-jets-samples.jpg", size=(54, 64)):
     image = rgb2gray(image)
 
     blocks = view_as_blocks(image, block_shape=size)
-    images = blocks.reshape((-1,) + size)
+    blocks = blocks.reshape((-1,) + size)
+    images = blocks[:, slice(2, 50), slice(2, 63)]
     return images
 
 
@@ -98,24 +99,22 @@ def align_main_axis(image, output_shape=(78, 78), threshold=0.05):
     image = rotate(image, angle=theta, resize=True)
 
     ny, nx = image.shape
-    x = np.arange(nx) - (nx - 1) / 2
-    y = np.arange(ny) - (ny - 1) / 2
+    x = np.arange(nx) - (nx - 1) / 2  # np.arange(image.shape[1]) - np.mean(y_blob)
+    y = np.arange(ny) - (ny - 1) / 2  # np.arange(image.shape[0]) - np.mean(x_blob)
     interp = interp2d(x=x, y=y, z=image)
 
     ny, nx = output_shape
     x_new = np.arange(nx) - (nx - 1) / 2
     y_new = np.arange(ny) - (ny - 1) / 2
     image = resize(interp(y=y_new, x=x_new), output_shape=(128, 128))
-    return image
+    return image[slice(32, 92), :]
 
 
-def renormalize_image(image, stretch=AsinhStretch(a=0.1), threshold=0.12):
+def renormalize_image(image, stretch=AsinhStretch(a=0.2), threshold=0.12):
     """Renormalize image"""
     normed = stretch(image)
-    smoothed = gaussian_filter(normed, 1.0)
-    resampled = block_reduce(smoothed, (2, 1), func=np.mean)
-    resampled[resampled < threshold] = 0
-    return resampled
+    normed[normed < threshold] = 0
+    return normed
 
 
 def align_images(images, output_shape=(88, 88)):

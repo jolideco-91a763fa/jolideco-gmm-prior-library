@@ -8,8 +8,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 from astropy.io import fits
+from astropy.nddata import block_reduce
 from jolideco.priors.patches.train import sklearn_gmm_to_table
 from jolideco.utils.numpy import view_as_overlapping_patches
+from scipy.ndimage import gaussian_filter
 from sklearn.mixture import GaussianMixture
 
 logging.basicConfig(level=logging.INFO)
@@ -64,9 +66,14 @@ def extract_patches(filename):
 
     stride = config["extract-patches"]["stride"]
     patch_shape = tuple(config["extract-patches"]["patch-shape"])
+    sigma = config["extract-patches"]["gaussian-smoothing"]
+    block_size = config["extract-patches"]["downsample-block-size"]
 
     for image in images:
-        p = view_as_overlapping_patches(image, shape=patch_shape, stride=stride)
+        smoothed = gaussian_filter(image, sigma)
+        image_coarse = block_reduce(smoothed, block_size, func=np.mean)
+
+        p = view_as_overlapping_patches(image_coarse, shape=patch_shape, stride=stride)
         valid = np.all(p > 0, axis=1)
         patches.extend(p[valid])
 
