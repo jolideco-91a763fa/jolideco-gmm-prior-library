@@ -1,6 +1,7 @@
 import json
 import logging
 import subprocess
+import time
 from pathlib import Path
 
 import click
@@ -20,6 +21,17 @@ log = logging.getLogger(__name__)
 RANDOM_STATE = np.random.RandomState(seed=0)
 
 
+def timeit(func):
+    def wrapper(*args, **kwargs):
+        t0 = time.time()
+        result = func(*args, **kwargs)
+        t1 = time.time()
+        log.info(f"Execution time: {t1 - t0:.2f} s")
+        return result
+
+    return wrapper
+
+
 @click.group()
 def cli():
     pass
@@ -34,6 +46,7 @@ def read_config(filename):
 
 @cli.command("pre-process-images")
 @click.argument("filename", type=Path)
+@timeit
 def pre_process_images(filename):
     """Pre-process data using a custom script"""
     config = read_config(filename)
@@ -57,6 +70,7 @@ def read_images(config, path_base):
 
 @cli.command("extract-patches")
 @click.argument("filename", type=Path)
+@timeit
 def extract_patches(filename):
     """Read images and extract and save patches"""
     config = read_config(filename=filename)
@@ -90,6 +104,7 @@ def extract_patches(filename):
 
 @cli.command("learn-gmm")
 @click.argument("filename", type=Path)
+@timeit
 def learn_gmm(filename):
     """Learn a Gaussian Mixture Model from a list of patches"""
     config = read_config(filename=filename)
