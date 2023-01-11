@@ -83,16 +83,17 @@ def extract_patches(filename):
 
 @cli.command("learn-gmm")
 @click.argument("filename", type=Path)
-def learn_gmm_model(filename):
+def learn_gmm(filename):
     """Learn a Gaussian Mixture Model from a list of patches"""
     config = read_config(filename=filename)
 
-    gmm = GaussianMixture(**config["learn-gmm"]["sklearn-gmm-kwargs"])
+    gmm = GaussianMixture(**config["sklearn-gmm-kwargs"])
 
-    filename_patches = config["extract-patches"]["filename"]
+    filename_patches = filename.parent / config["extract-patches"]["filename"]
     log.info(f"Reading {filename_patches}")
     patches = fits.getdata(filename_patches)
 
+    log.info(f"Fitting GMM to {len(patches)} patches...")
     gmm.fit(X=patches)
 
     filename = config["filename"]
