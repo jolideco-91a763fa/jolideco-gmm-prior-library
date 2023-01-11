@@ -118,10 +118,10 @@ def learn_gmm(filename):
     log.info(f"Fitting GMM to {len(patches)} patches...")
     gmm.fit(X=patches)
 
-    filename = config["filename"]
+    filename_gmm = filename.parent / config["filename"]
     table = sklearn_gmm_to_table(gmm=gmm)
-    log.info(f"Writing {filename}")
-    table.write(filename, overwrite=True)
+    log.info(f"Writing {filename_gmm}")
+    table.write(filename_gmm, overwrite=True)
 
 
 def plot_example_patches(patches, patch_shape, n_patches=60):

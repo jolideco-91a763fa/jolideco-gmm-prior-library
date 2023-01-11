@@ -1,17 +1,20 @@
 name: nrao-jets-v0.1
 pre-process-script: preprocess.py
-filename: gmm-nrao-jets-v0.1.fits
+filename: gmm-nrao-jets-v0.1.fits.gz
 format: table
 extract-patches:
-  input-images: images/*.fits.gz
-  patch-shape: [8, 8]
-  stride: 1
-  filename: patches-nrao-jets-v0.1.fits.gz
-  gaussian-smoothing: 1.
-  downsample-block-size: [2, 1]
+    input-images: images/*.fits.gz
+    patch-shape: [8, 8]
+    stride: 1
+    filename: patches-nrao-jets-v0.1.fits.gz
+    gaussian-smoothing: 1.
+    downsample-block-size: [2, 1]
 sklearn-gmm-kwargs:
     n_components: 32
     warm_start: False
     covariance_type: full
-    n_init: 1
+    n_init: 5
+    tol: 1e-3
+    max_iter: 200
+    init_params: 'kmeans'
 
