@@ -7,7 +7,9 @@ import click
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
+from astropy.io import fits
 from jolideco.priors.patches.train import sklearn_gmm_to_table
+from jolideco.utils.numpy import view_as_overlapping_patches
 from sklearn.mixture import GaussianMixture
 
 logging.basicConfig(level=logging.INFO)
@@ -28,37 +30,70 @@ def read_config(filename):
     return data
 
 
-@cli.command("pre-process")
-@cli.argument("filename", type=click.Path(exists=True))
-def pre_process(filename):
+@cli.command("pre-process-images")
+@click.argument("filename", type=Path)
+def pre_process_images(filename):
     """Pre-process data using a custom script"""
     config = read_config(filename)
 
     command = ["python", config["pre-process-script"]]
-    log.info(f"Running {command}")
-    subprocess.call(command)
+    log.info(f"Running command: {' '.join(command)}")
+    subprocess.call(command, cwd=filename.parent)
 
 
-def prepare_patches(config):
-    """"""
-    pass
+def read_images(config, path_base):
+    """Read images from FITS files"""
+    images = []
+
+    for filename in path_base.glob(config["extract-patches"]["input-images"]):
+        log.info(f"Reading {filename}")
+        image = fits.getdata(filename)
+        images.append(image)
+
+    return images
 
 
-@cli.command("learn-gmm")
-@cli.argument("filename", type=click.Path(exists=True))
-def learn_gmm_model(filename):
-    """Learn a Gaussian Mixture Model from a list of patches"""
-    config = yaml.safe_load(filename)
+@cli.command("extract-patches")
+@click.argument("filename", type=Path)
+def extract_patches(filename):
+    """Read images and extract and save patches"""
+    config = read_config(filename=filename)
+    images = read_images(config=config, path_base=filename.parent)
 
-    gmm = GaussianMixture(**config["learn-gmm"]["sklearn-gmm-kwargs"])
+    patches = []
 
-    patches = prepare_patches(config["learn-gmm"]["patches"])
+    stride = config["extract-patches"]["stride"]
+    patch_shape = tuple(config["extract-patches"]["patch-shape"])
+
+    for image in images:
+        p = view_as_overlapping_patches(image, shape=patch_shape, stride=stride)
+        valid = np.all(p > 0, axis=1)
+        patches.extend(p[valid])
+
+    patches = np.array(patches)
 
     patches_normed = patches - patches.mean(
         axis=1, keepdims=True
     )  # / patches.std(axis=1, keepdims=True)
 
-    gmm.fit(X=patches_normed)
+    filename_patches = filename.parent / config["extract-patches"]["filename"]
+    log.info(f"Writing {filename_patches}")
+    fits.writeto(filename_patches, data=patches_normed, overwrite=True)
+
+
+@cli.command("learn-gmm")
+@click.argument("filename", type=Path)
+def learn_gmm_model(filename):
+    """Learn a Gaussian Mixture Model from a list of patches"""
+    config = read_config(filename=filename)
+
+    gmm = GaussianMixture(**config["learn-gmm"]["sklearn-gmm-kwargs"])
+
+    filename_patches = config["extract-patches"]["filename"]
+    log.info(f"Reading {filename_patches}")
+    patches = fits.getdata(filename_patches)
+
+    gmm.fit(X=patches)
 
     filename = config["filename"]
     table = sklearn_gmm_to_table(gmm=gmm)
@@ -87,14 +122,13 @@ def plot_gmm_means(gmm):
     pass
 
 
-
 @cli.command("summarize-gmm")
-@cli.argument("filename", type=click.Path(exists=True))
+@click.argument("filename", type=click.Path(exists=True))
 def summarize_gmm(filename):
     """Summarize a Gaussian Mixture Model"""
     config = read_config(filename)
 
-    plot_example_patches(patches=, patch_shape=, n_patches=)
+    plot_example_patches(patches=0, patch_shape=(2, 2), n_patches=10)
 
 
 @cli.command("write-index")

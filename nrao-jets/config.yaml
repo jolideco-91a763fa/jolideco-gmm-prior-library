@@ -2,12 +2,14 @@ name: nrao-jets-v0.1
 pre-process-script: preprocess.py
 filename: gmm-nrao-jets-v0.1.fits
 format: table
-learn-gmm:
-  input-images: images/*.fits
-  patch-shape: (8, 8)
-  sklearn-gmm-kwargs:
-      n_components: 32
-      warm_start: False
-      covariance_type: full
-      n_init: 1
+extract-patches:
+  input-images: images/*.fits.gz
+  patch-shape: [8, 8]
+  stride: 1
+  filename: patches-nrao-jets-v0.1.fits.gz
+sklearn-gmm-kwargs:
+    n_components: 32
+    warm_start: False
+    covariance_type: full
+    n_init: 1
 

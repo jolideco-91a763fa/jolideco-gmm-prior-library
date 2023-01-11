@@ -111,7 +111,7 @@ def align_main_axis(image, output_shape=(78, 78), threshold=0.05):
 
 def renormalize_image(image, stretch=AsinhStretch(a=0.1), threshold=0.12):
     """Renormalize image"""
-    normed = stretch(smoothed)
+    normed = stretch(image)
     smoothed = gaussian_filter(normed, 1.0)
     resampled = block_reduce(smoothed, (2, 1), func=np.mean)
     resampled[resampled < threshold] = 0
@@ -148,19 +148,6 @@ def pre_process_images():
     images = get_jet_images()
     images_aligned = align_images(images)
     save_images(images_aligned)
-
-
-def extract_patches(images, patch_shape=(8, 8)):
-    """Extract patches"""
-    patches = []
-
-    for image in images:
-        p = view_as_overlapping_patches(image_coarse, shape=patch_shape, stride=1)
-        valid = np.all(p > 0, axis=1)
-        patches.extend(p[valid])
-
-    patches = np.array(patches)
-    return patches
 
 
 def apply_random_rotation(images):
