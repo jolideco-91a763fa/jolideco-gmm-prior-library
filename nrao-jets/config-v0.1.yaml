@@ -17,4 +17,6 @@ sklearn-gmm-kwargs:
     tol: 1e-3
     max_iter: 200
     init_params: 'kmeans'
+plots:
+    ncols: 8
 

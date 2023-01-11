@@ -156,7 +156,7 @@ def summarize_gmm(filename):
         filename=filename.parent / config["filename"], format=config["format"]
     )
 
-    gmm.plot_mean_images(ncols=8)
+    gmm.plot_mean_images(ncols=config["plots"]["ncols"])
     plt.tight_layout()
 
     path = filename.parent / "plots"
@@ -167,7 +167,7 @@ def summarize_gmm(filename):
     log.info(f"Writing {filename}")
     plt.savefig(filename, dpi=300)
 
-    gmm.plot_eigen_images(ncols=8)
+    gmm.plot_eigen_images(ncols=config["plots"]["ncols"])
     plt.tight_layout()
 
     filename = path / f"gmm-eigen-images-{name}.png"
