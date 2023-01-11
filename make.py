@@ -10,6 +10,7 @@ import numpy as np
 import yaml
 from astropy.io import fits
 from astropy.nddata import block_reduce
+from jolideco.priors.patches import GaussianMixtureModel
 from jolideco.priors.patches.train import sklearn_gmm_to_table
 from jolideco.utils.numpy import view_as_overlapping_patches
 from scipy.ndimage import gaussian_filter
@@ -146,12 +147,32 @@ def plot_gmm_means(gmm):
 
 
 @cli.command("summarize-gmm")
-@click.argument("filename", type=click.Path(exists=True))
+@click.argument("filename", type=Path)
 def summarize_gmm(filename):
     """Summarize a Gaussian Mixture Model"""
     config = read_config(filename)
 
-    plot_example_patches(patches=0, patch_shape=(2, 2), n_patches=10)
+    gmm = GaussianMixtureModel.read(
+        filename=filename.parent / config["filename"], format=config["format"]
+    )
+
+    gmm.plot_mean_images(ncols=8)
+    plt.tight_layout()
+
+    path = filename.parent / "plots"
+    path.mkdir(exist_ok=True)
+
+    name = config["name"]
+    filename = path / f"gmm-means-{name}.png"
+    log.info(f"Writing {filename}")
+    plt.savefig(filename, dpi=300)
+
+    gmm.plot_eigen_images(ncols=8)
+    plt.tight_layout()
+
+    filename = path / f"gmm-eigen-images-{name}.png"
+    log.info(f"Writing {filename}")
+    plt.savefig(filename, dpi=300)
 
 
 @cli.command("write-index")
