@@ -4,7 +4,6 @@ import numpy as np
 from astropy.io import fits
 from astropy.nddata import block_reduce
 from astropy.visualization import AsinhStretch
-from jolideco.priors.patches.train import sklearn_gmm_to_table
 from jolideco.utils.numpy import view_as_overlapping_patches
 from matplotlib.image import imread
 from scipy.interpolate import interp2d
@@ -14,7 +13,6 @@ from skimage.color import rgb2gray
 from skimage.feature import blob_dog
 from skimage.transform import AffineTransform, resize, rotate, warp
 from skimage.util import view_as_blocks
-from sklearn.mixture import GaussianMixture
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -181,34 +179,6 @@ def apply_random_rotation(images):
         images_rotated.append(image_rotated)
 
     return images_rotated
-
-
-def learn_gmm_model(patches, n_components=32, n_init=1):
-    """Learn a Gaussian Mixture Model from a list of patches"""
-    gmm = GaussianMixture(
-        n_components=n_components,
-        warm_start=False,
-        covariance_type="full",
-        n_init=n_init,
-    )
-
-    gmm.fit(patches)
-    return gmm
-
-
-def save_gmm(gmm, filename):
-    """Save GMM to fit file
-
-    Parameters
-    ----------
-    gmm : `~sklearn.mixture.GaussianMixture`
-        Gaussian Mixture Model
-    filename : str
-        Filename
-    """
-    table = sklearn_gmm_to_table(gmm=gmm)
-    log.info(f"Writing {filename}")
-    table.write(filename, overwrite=True)
 
 
 if __name__ == "__main__":
