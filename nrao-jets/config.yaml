@@ -1,5 +1,5 @@
 name: nrao-jets-v0.1
-preprocess-script: make.py
+pre-process-script: preprocess.py
 filename: gmm-nrao-jets-v0.1.fits
 format: table
 learn-gmm:

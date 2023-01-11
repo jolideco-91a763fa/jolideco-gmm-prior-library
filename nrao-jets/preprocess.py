@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import numpy as np
 from astropy.io import fits
@@ -31,11 +32,12 @@ def get_jet_images(filename="data/radio-jets-samples.jpg", size=(54, 64)):
     images : `~numpy.ndarray`
         Images
     """
+    log.info(f"Reading {filename}")
     image = imread(filename)
     image = rgb2gray(image)
 
     blocks = view_as_blocks(image, block_shape=size)
-    images = blocks.reshape((-1) + size)
+    images = blocks.reshape((-1,) + size)
     return images
 
 
@@ -109,9 +111,11 @@ def align_main_axis(image, output_shape=(78, 78), threshold=0.05):
 
 def renormalize_image(image, stretch=AsinhStretch(a=0.1), threshold=0.12):
     """Renormalize image"""
-    normed = stretch(image)
-    normed[normed < threshold] = 0
-    return normed
+    normed = stretch(smoothed)
+    smoothed = gaussian_filter(normed, 1.0)
+    resampled = block_reduce(smoothed, (2, 1), func=np.mean)
+    resampled[resampled < threshold] = 0
+    return resampled
 
 
 def align_images(images, output_shape=(88, 88)):
@@ -128,12 +132,15 @@ def align_images(images, output_shape=(88, 88)):
     return images_aligned
 
 
-def save_images(images, filename="data/nrao-jets-images.fits.gz"):
+def save_images(images):
     """Save images"""
-    hdulist = fits.HDUList()
-    hdulist.append(fits.PrimaryHDU(data=images))
-    hdulist.writeto(filename, overwrite=True)
-    log.info(f"Writing {filename}")
+    path = Path("images")
+    path.mkdir(exist_ok=True)
+
+    for idx, image in enumerate(images):
+        filename = path / f"image-nrao-jet-{idx:03d}.fits.gz"
+        log.info(f"Writing {filename}")
+        fits.writeto(filename, data=image, overwrite=True)
 
 
 def pre_process_images():
@@ -148,8 +155,6 @@ def extract_patches(images, patch_shape=(8, 8)):
     patches = []
 
     for image in images:
-        smoothed = gaussian_filter(image, 1.0)
-        image_coarse = block_reduce(smoothed, (2, 1), func=np.mean)
         p = view_as_overlapping_patches(image_coarse, shape=patch_shape, stride=1)
         valid = np.all(p > 0, axis=1)
         patches.extend(p[valid])
