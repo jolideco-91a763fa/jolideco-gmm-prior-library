@@ -205,15 +205,15 @@ def write_index_file():
     """
     index = {}
 
-    for filename in Path(".").glob("*/config.yaml"):
+    for filename in Path(".").glob("*/config*.yaml"):
         log.info(f"Reading {filename}")
         data = yaml.safe_load(filename.read_text())
 
-        filename_gmm = "$JOLIDECO_GMM_LIBRARAY" + filename.parent / data["filename"]
+        filename_gmm = "$JOLIDECO_GMM_LIBRARY" + str(filename.parent / data["filename"])
         entry = {"filename": filename_gmm, "format": data["format"]}
         index[data["name"]] = entry
 
-    filename = Path("index.json")
+    filename = Path("jolideco-gmm-library-index.json")
 
     with filename.open("w") as fh:
         log.info(f"Writing {filename}")
