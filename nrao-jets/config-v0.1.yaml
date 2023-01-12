@@ -6,7 +6,7 @@ extract-patches:
     input-images: images/*.fits.gz
     patch-shape: [8, 8]
     stride: 1
-    filename: patches-nrao-jets-v0.1.fits.gz
+    filename: patches/patches-nrao-jets-v0.1.fits.gz
     gaussian-smoothing: 1.
     downsample-block-size: [2, 1]
 sklearn-gmm-kwargs:

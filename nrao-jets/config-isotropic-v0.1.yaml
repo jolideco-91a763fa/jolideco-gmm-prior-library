@@ -7,7 +7,7 @@ extract-patches:
     patch-shape: [8, 8]
     stride: 1
     random-rotation: true
-    filename: patches-nrao-jets-isotropic-v0.1.fits.gz
+    filename: patches/patches-nrao-jets-isotropic-v0.1.fits.gz
     gaussian-smoothing: 1.
     downsample-block-size: [2, 1]
 sklearn-gmm-kwargs:

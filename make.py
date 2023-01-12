@@ -121,6 +121,8 @@ def extract_patches(filename):
     )  # / patches.std(axis=1, keepdims=True)
 
     filename_patches = filename.parent / config["extract-patches"]["filename"]
+    filename_patches.parent.mkdir(exist_ok=True, parents=True)
+
     log.info(f"Writing {filename_patches}")
     fits.writeto(filename_patches, data=patches_normed, overwrite=True)
 
