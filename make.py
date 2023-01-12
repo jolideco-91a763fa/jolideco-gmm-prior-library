@@ -209,7 +209,9 @@ def write_index_file():
         log.info(f"Reading {filename}")
         data = yaml.safe_load(filename.read_text())
 
-        filename_gmm = "$JOLIDECO_GMM_LIBRARY" + str(filename.parent / data["filename"])
+        filename_gmm = "$JOLIDECO_GMM_LIBRARY/" + str(
+            filename.parent / data["filename"]
+        )
         entry = {"filename": filename_gmm, "format": data["format"]}
         index[data["name"]] = entry
 
