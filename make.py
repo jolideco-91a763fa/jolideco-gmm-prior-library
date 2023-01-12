@@ -149,7 +149,7 @@ def learn_gmm(filename):
 
 def plot_example_patches(patches, patch_shape, n_patches=60):
     """Plot example patches"""
-    fig, axes = plt.subplots(ncols=10, nrows=6, figsize=(10, 8))
+    _, axes = plt.subplots(ncols=10, nrows=6, figsize=(10, 8))
 
     idx_list = RANDOM_STATE.randint(0, len(patches), n_patches)
 
@@ -161,11 +161,6 @@ def plot_example_patches(patches, patch_shape, n_patches=60):
     filename = "patches-examples.png"
     log.info(f"Writing {filename}")
     plt.savefig(filename, dpi=300)
-
-
-def plot_gmm_means(gmm):
-    """"""
-    pass
 
 
 @cli.command("summarize-gmm")
