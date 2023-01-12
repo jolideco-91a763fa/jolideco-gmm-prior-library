@@ -3,12 +3,9 @@ from pathlib import Path
 
 import numpy as np
 from astropy.io import fits
-from astropy.nddata import block_reduce
 from astropy.visualization import AsinhStretch
-from jolideco.utils.numpy import view_as_overlapping_patches
 from matplotlib.image import imread
 from scipy.interpolate import interp2d
-from scipy.ndimage import gaussian_filter
 from scipy.stats import linregress
 from skimage.color import rgb2gray
 from skimage.feature import blob_dog
@@ -147,29 +144,6 @@ def pre_process_images():
     images = get_jet_images()
     images_aligned = align_images(images)
     save_images(images_aligned)
-
-
-def apply_random_rotation(images):
-    """Apply a random rotation to images
-
-    Parameters
-    ----------
-    images : list of `~numpy.ndarray`
-        List of images
-
-    Returns
-    -------
-    images_rotated : list of `~numpy.ndarray`
-        List of rotated images
-    """
-    images_rotated = []
-
-    for image in images:
-        theta = np.random.uniform(-10, 10)
-        image_rotated = rotate(image, angle=theta, resize=True)
-        images_rotated.append(image_rotated)
-
-    return images_rotated
 
 
 if __name__ == "__main__":

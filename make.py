@@ -14,6 +14,7 @@ from jolideco.priors.patches import GaussianMixtureModel
 from jolideco.priors.patches.train import sklearn_gmm_to_table
 from jolideco.utils.numpy import view_as_overlapping_patches
 from scipy.ndimage import gaussian_filter
+from skimage.transform import rotate
 from sklearn.mixture import GaussianMixture
 
 logging.basicConfig(level=logging.INFO)
@@ -69,6 +70,24 @@ def read_images(config, path_base):
     return images
 
 
+def apply_random_rotation(image):
+    """Apply a random rotation to images
+
+    Parameters
+    ----------
+    images : list of `~numpy.ndarray`
+        List of images
+
+    Returns
+    -------
+    images_rotated : list of `~numpy.ndarray`
+        List of rotated images
+    """
+    theta = RANDOM_STATE.uniform(0, 180)  # in deg
+    image_rotated = rotate(image, angle=theta, resize=True)
+    return image_rotated
+
+
 @cli.command("extract-patches")
 @click.argument("filename", type=Path)
 @timeit
@@ -87,6 +106,9 @@ def extract_patches(filename):
     for image in images:
         smoothed = gaussian_filter(image, sigma)
         image_coarse = block_reduce(smoothed, block_size, func=np.mean)
+
+        if config["extract-patches"].get("random-rotation", False):
+            image_coarse = apply_random_rotation(image_coarse)
 
         p = view_as_overlapping_patches(image_coarse, shape=patch_shape, stride=stride)
         valid = np.all(p > 0, axis=1)
