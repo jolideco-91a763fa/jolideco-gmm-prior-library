@@ -1,0 +1,9 @@
+scikit-image
+scikit-learn
+jolideco
+scipy
+astropy
+numpy
+matplotlib
+click
+yaml
