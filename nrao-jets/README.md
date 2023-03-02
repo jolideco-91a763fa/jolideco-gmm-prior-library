@@ -13,3 +13,11 @@
 
 ### Gaussian Covariance Eigen Images
 ![](plots/gmm-eigen-images-nrao-jets-v0.1.png)
+
+
+## GMM Isotropic v0.1 Overview
+### Gaussian Means Images
+![](plots/gmm-means-nrao-jets-isotropic-v0.1.png)
+
+### Gaussian Covariance Eigen Images
+![](plots/gmm-eigen-images-nrao-jets-isotropic-v0.1.png)
