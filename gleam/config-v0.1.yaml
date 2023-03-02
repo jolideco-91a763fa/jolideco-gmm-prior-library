@@ -1,0 +1,22 @@
+name: gleam-v0.1
+pre-process-script: preprocess.py
+filename: gleam-v0.1.fits.gz
+format: table
+extract-patches:
+    input-images: images/*.fits.gz
+    patch-shape: [8, 8]
+    stride: 2
+    random-rotation: true
+    filename: patches/gleam-v0.1.fits.gz
+    gaussian-smoothing: 1.5
+    downsample-block-size: [4, 4]
+sklearn-gmm-kwargs:
+    n_components: 128
+    warm_start: False
+    covariance_type: full
+    n_init: 1
+    tol: 0.001
+    max_iter: 500
+    init_params: 'kmeans'
+plots:
+    ncols: 12

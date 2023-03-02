@@ -7,6 +7,10 @@
     "filename": "$JOLIDECO_GMM_LIBRARY/nrao-jets/gmm-nrao-jets-isotropic-v0.1.fits.gz",
     "format": "table"
   },
+  "gleam-v0.1": {
+    "filename": "$JOLIDECO_GMM_LIBRARY/gleam/gleam-v0.1.fits.gz",
+    "format": "table"
+  },
   "zoran-weiss": {
     "filename": "$JOLIDECO_GMM_LIBRARY/zoran-weiss/GSModel_8x8_200_2M_noDC_zeromean.mat",
     "format": "epll-matlab"

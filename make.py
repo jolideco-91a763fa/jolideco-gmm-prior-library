@@ -107,6 +107,9 @@ def extract_patches(filename):
         smoothed = gaussian_filter(image, sigma)
         image_coarse = block_reduce(smoothed, block_size, func=np.mean)
 
+        image_coarse = image_coarse / np.nanmax(image_coarse)
+        image_coarse = np.clip(image_coarse, 0, 1)
+
         if config["extract-patches"].get("random-rotation", False):
             image_coarse = apply_random_rotation(image_coarse)
 
@@ -123,6 +126,7 @@ def extract_patches(filename):
     filename_patches = filename.parent / config["extract-patches"]["filename"]
     filename_patches.parent.mkdir(exist_ok=True, parents=True)
 
+    log.info(f"Extracted {len(patches_normed)} patches.")
     log.info(f"Writing {filename_patches}")
     fits.writeto(filename_patches, data=patches_normed, overwrite=True)
 
