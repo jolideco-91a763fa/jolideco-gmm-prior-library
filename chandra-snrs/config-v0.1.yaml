@@ -1,0 +1,22 @@
+name: chandra-snrs-v0.1
+pre-process-script: preprocess.py
+filename: chandra-snrs-v0.1.fits.gz
+format: table
+extract-patches:
+    input-images: images/*.fits.gz
+    patch-shape: [8, 8]
+    stride: 2
+    random-rotation: false
+    filename: patches/chandra-snrs-v0.1.fits.gz
+    gaussian-smoothing: 0.01
+    downsample-block-size: [1, 1]
+sklearn-gmm-kwargs:
+    n_components: 64
+    warm_start: False
+    covariance_type: full
+    n_init: 1
+    tol: 0.001
+    max_iter: 500
+    init_params: 'kmeans'
+plots:
+    ncols: 8

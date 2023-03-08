@@ -1,0 +1,20 @@
+name: jolideco-gmm-library
+
+channels:
+  - conda-forge
+
+variables:
+  PYTHONNOUSERSITE: "1"
+
+dependencies:
+  - python=3.9
+  - scikit-image
+  - scikit-learn
+  - scipy
+  - astropy
+  - numpy
+  - matplotlib
+  - gammapy
+  - yaml
+  - requests
+  - tqdm
