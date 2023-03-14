@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 SIZE_REF = 1 * u.deg
 BIN_SIZE_REF = 0.02 * u.deg
-OVERSAMPLING_FACTOR = 2
+OVERSAMPLING_FACTOR = 1.0
 
 URL_BASE = "https://hea-www.harvard.edu/ChandraSNR/{source}/{obs_id}/work/acis_E300-10000_FLUXED.fits.gz"
 
@@ -96,7 +96,7 @@ def scale_image():
 
         data = data.smooth("0.01 deg").interp_to_geom(geom=geom)
         data.data = data.data / data.data.max()
-        data.data = AsinhStretch(a=0.2)(data.data)
+        # data.data = AsinhStretch(a=0.8)(data.data)
         data.write(filename_out, overwrite=True)
 
 

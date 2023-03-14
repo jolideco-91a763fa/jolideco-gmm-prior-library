@@ -62,7 +62,7 @@ def read_images(config, path_base):
     """Read images from FITS files"""
     images = []
 
-    for filename in path_base.glob(config["extract-patches"]["input-images"]):
+    for filename in path_base.glob(config["input-images"]):
         log.info(f"Reading {filename}")
         image = fits.getdata(filename)
         images.append(image)
@@ -93,24 +93,24 @@ def apply_random_rotation(image):
 @timeit
 def extract_patches(filename):
     """Read images and extract and save patches"""
-    config = read_config(filename=filename)
+    config = read_config(filename=filename)["extract-patches"]
     images = read_images(config=config, path_base=filename.parent)
 
     patches = []
 
-    stride = config["extract-patches"]["stride"]
-    patch_shape = tuple(config["extract-patches"]["patch-shape"])
-    sigma = config["extract-patches"]["gaussian-smoothing"]
-    block_size = config["extract-patches"]["downsample-block-size"]
+    stride = config["stride"]
+    patch_shape = tuple(config["patch-shape"])
+    sigma = config["gaussian-smoothing"]
+    block_size = config["downsample-block-size"]
 
-    for image in images:
+    for image in images * config.get("random-nrepeat", 1):
         smoothed = gaussian_filter(image, sigma)
         image_coarse = block_reduce(smoothed, block_size, func=np.mean)
 
         image_coarse = image_coarse / np.nanmax(image_coarse)
         image_coarse = np.clip(image_coarse, 0, 1)
 
-        if config["extract-patches"].get("random-rotation", False):
+        if config.get("random-rotation", False):
             image_coarse = apply_random_rotation(image_coarse)
 
         p = view_as_overlapping_patches(image_coarse, shape=patch_shape, stride=stride)
@@ -119,11 +119,9 @@ def extract_patches(filename):
 
     patches = np.array(patches)
 
-    patches_normed = patches - patches.mean(
-        axis=1, keepdims=True
-    )  # / patches.std(axis=1, keepdims=True)
+    patches_normed = patches - np.nanmean(patches, axis=1, keepdims=True)
 
-    filename_patches = filename.parent / config["extract-patches"]["filename"]
+    filename_patches = filename.parent / config["filename"]
     filename_patches.parent.mkdir(exist_ok=True, parents=True)
 
     log.info(f"Extracted {len(patches_normed)} patches.")
