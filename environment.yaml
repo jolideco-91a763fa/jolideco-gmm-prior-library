@@ -11,10 +11,11 @@ dependencies:
   - scikit-image
   - scikit-learn
   - scipy
-  - astropy
+  - astropy=5.2
   - numpy
   - matplotlib
-  - gammapy
+  - gammapy=1.0
   - yaml
   - requests
   - tqdm
+  - jupyter
