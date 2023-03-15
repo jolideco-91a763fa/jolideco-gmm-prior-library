@@ -5,7 +5,6 @@ import numpy as np
 import requests
 from astropy import units as u
 from astropy.io import fits
-from astropy.visualization import AsinhStretch
 from astropy.wcs import WCS
 from gammapy.estimators import ImageProfileEstimator
 from gammapy.maps import Map, WcsGeom
@@ -96,7 +95,6 @@ def scale_image():
 
         data = data.smooth("0.01 deg").interp_to_geom(geom=geom)
         data.data = data.data / data.data.max()
-        # data.data = AsinhStretch(a=0.8)(data.data)
         data.write(filename_out, overwrite=True)
 
 
