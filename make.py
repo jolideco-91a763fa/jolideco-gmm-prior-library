@@ -12,6 +12,7 @@ from astropy.io import fits
 from astropy.nddata import block_reduce
 from jolideco.priors.patches import GaussianMixtureModel
 from jolideco.priors.patches.train import sklearn_gmm_to_table
+from jolideco.utils.norms import PatchNorm
 from jolideco.utils.numpy import view_as_overlapping_patches
 from scipy.ndimage import gaussian_filter
 from skimage.transform import rotate
@@ -119,7 +120,9 @@ def extract_patches(filename):
 
     patches = np.array(patches)
 
-    patches_normed = patches - np.nanmean(patches, axis=1, keepdims=True)
+    patch_norm = PatchNorm.from_dict(config["patch-norm"])
+
+    patches_normed = patch_norm.evaluate_numpy(patches)
 
     filename_patches = filename.parent / config["filename"]
     filename_patches.parent.mkdir(exist_ok=True, parents=True)
