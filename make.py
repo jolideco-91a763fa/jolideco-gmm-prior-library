@@ -129,7 +129,7 @@ def extract_patches(filename):
 
     log.info(f"Extracted {len(patches_normed)} patches.")
     log.info(f"Writing {filename_patches}")
-    fits.writeto(filename_patches, data=patches_normed, overwrite=True)
+    fits.writeto(filename_patches, data=patches_normed, header=header, overwrite=True)
 
 
 @cli.command("learn-gmm")
@@ -150,6 +150,7 @@ def learn_gmm(filename):
 
     filename_gmm = filename.parent / config["filename"]
     table = sklearn_gmm_to_table(gmm=gmm)
+    table.meta["PNPTYPE"] = config["extract-patches"]["patch-norm"]["type"]
     log.info(f"Writing {filename_gmm}")
     table.write(filename_gmm, overwrite=True)
 
