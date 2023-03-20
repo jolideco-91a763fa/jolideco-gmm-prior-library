@@ -10,6 +10,8 @@ extract-patches:
     filename: patches/gleam-v0.1.fits.gz
     gaussian-smoothing: 1.5
     downsample-block-size: [4, 4]
+    patch-norm:
+        type: "std-subtract-mean"
 sklearn-gmm-kwargs:
     n_components: 128
     warm_start: False
