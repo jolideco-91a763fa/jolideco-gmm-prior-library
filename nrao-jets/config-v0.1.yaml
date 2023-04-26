@@ -9,6 +9,8 @@ extract-patches:
     filename: patches/patches-nrao-jets-v0.1.fits.gz
     gaussian-smoothing: 1.
     downsample-block-size: [2, 1]
+    patch-norm:
+        type: "std-subtract-mean"
 sklearn-gmm-kwargs:
     n_components: 32
     warm_start: False

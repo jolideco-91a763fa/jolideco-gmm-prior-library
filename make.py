@@ -129,7 +129,7 @@ def extract_patches(filename):
 
     log.info(f"Extracted {len(patches_normed)} patches.")
     log.info(f"Writing {filename_patches}")
-    fits.writeto(filename_patches, data=patches_normed, header=header, overwrite=True)
+    fits.writeto(filename_patches, data=patches_normed, overwrite=True)
 
 
 @cli.command("learn-gmm")
