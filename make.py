@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 import yaml
 from astropy.io import fits
 from astropy.nddata import block_reduce
@@ -14,6 +15,7 @@ from jolideco.priors.patches import GaussianMixtureModel
 from jolideco.priors.patches.train import sklearn_gmm_to_table
 from jolideco.utils.norms import PatchNorm
 from jolideco.utils.numpy import view_as_overlapping_patches
+from jolideco.utils.torch import cycle_spin_subpixel
 from scipy.ndimage import gaussian_filter
 from skimage.transform import rotate
 from sklearn.mixture import GaussianMixture
@@ -22,6 +24,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 RANDOM_STATE = np.random.RandomState(seed=0)
+GENERATOR = torch.Generator(device="cpu")
 
 
 def timeit(func):
@@ -89,6 +92,14 @@ def apply_random_rotation(image):
     return image_rotated
 
 
+def cycle_spin_subpixel_numpy(image, generator):
+    """Cycle spin subpixel"""
+    image = torch.from_numpy(image[np.newaxis, np.newaxis].astype(np.float32))
+    image = cycle_spin_subpixel(image, generator=generator)
+    image = image.numpy()
+    return image[0, 0]
+
+
 @cli.command("extract-patches")
 @click.argument("filename", type=Path)
 @timeit
@@ -107,6 +118,8 @@ def extract_patches(filename):
     for image in images * config.get("random-nrepeat", 1):
         smoothed = gaussian_filter(image, sigma)
         image_coarse = block_reduce(smoothed, block_size, func=np.mean)
+
+        image_coarse = cycle_spin_subpixel_numpy(image_coarse, generator=GENERATOR)
 
         image_coarse = image_coarse / np.nanmax(image_coarse)
         image_coarse = np.clip(image_coarse, 0, 1)
@@ -201,7 +214,7 @@ def summarize_gmm(filename):
 
 
 @cli.command("write-index")
-def write_index_file():
+def write_index_file(filename=None):
     """Write index file
 
     Read all config files from sub-directories and write a json index file with all entries.
@@ -223,6 +236,18 @@ def write_index_file():
     with filename.open("w") as fh:
         log.info(f"Writing {filename}")
         json.dump(index, fh, indent=2)
+
+
+@cli.command("all", short_help="Run all commands")
+@click.argument("filename", type=Path)
+@click.pass_context
+def cli_run_all(ctx, filename):
+    """Run all commands"""
+    ctx.forward(pre_process_images)
+    ctx.forward(extract_patches)
+    ctx.forward(learn_gmm)
+    ctx.forward(summarize_gmm)
+    ctx.forward(write_index_file)
 
 
 if __name__ == "__main__":
