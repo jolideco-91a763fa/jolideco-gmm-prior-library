@@ -8,7 +8,7 @@
 
 ## GMM v0.1 Overview
 ### Gaussian Means Images
-![](plots/jwst-cas-a/plots/gmm-means-jwst-cas-a-v0.1.png)
+![](plots/gmm-means-jwst-cas-a-v0.1.png)
 
 ### Gaussian Covariance Eigen Images
-![](plots/jwst-cas-a/plots/gmm-eigen-images-jwst-cas-a-v0.1.png)
+![](plots/gmm-eigen-images-jwst-cas-a-v0.1.png)
