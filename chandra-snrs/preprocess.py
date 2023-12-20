@@ -50,9 +50,10 @@ def download_data():
     """Download data"""
 
     for source, obs_id in SOURCES.items():
-        filename = f"data/{source}-flux.fits.gz"
+        filename = Path(f"data/{source}-flux.fits.gz")
+        filename.parent.mkdir(exist_ok=True, parents=True)
 
-        if Path(filename).exists():
+        if filename.exists():
             log.info(f"Skipping {filename} as it already exists.")
             continue
 
