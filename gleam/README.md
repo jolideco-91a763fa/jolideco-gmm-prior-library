@@ -3,6 +3,10 @@
 - Downloaded from http://gleam-vo.icrar.org/gleam_postage/q/form
 - Using https://github.com/ICRAR/gleamvo-client
 
+## Images
+
+![](plots/gleam-data.png)
+
  
 ## GMM Overview
 ### Gaussian Means Images
