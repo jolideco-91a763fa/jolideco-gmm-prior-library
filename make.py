@@ -11,20 +11,25 @@ import torch
 import yaml
 from astropy.io import fits
 from astropy.nddata import block_reduce
+from astropy.table import Table
 from jolideco.priors.patches import GaussianMixtureModel
-from jolideco.priors.patches.train import sklearn_gmm_to_table
 from jolideco.utils.norms import PatchNorm
 from jolideco.utils.numpy import view_as_overlapping_patches
 from jolideco.utils.torch import cycle_spin_subpixel
 from scipy.ndimage import gaussian_filter
 from skimage.transform import rotate
-from sklearn.mixture import GaussianMixture
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 RANDOM_STATE = np.random.RandomState(seed=0)
 GENERATOR = torch.Generator(device="cpu")
+USE_GMMX = True
+
+if USE_GMMX:
+    from gmmx import GaussianMixtureSKLearn as GaussianMixture
+else:
+    from sklearn.mixture import GaussianMixture
 
 
 def timeit(func):
@@ -60,6 +65,27 @@ def pre_process_images(filename):
     command = ["python", config["pre-process-script"]]
     log.info(f"Running command: {' '.join(command)}")
     subprocess.call(command, cwd=filename.parent)
+
+
+def sklearn_gmm_to_table(gmm):
+    """Convert scikit-learn GaussianMixture to table
+
+    Parameters
+    ----------
+    gmm : `~sklearn.mixture.GaussianMixture`
+        GMM model
+
+    Returns
+    -------
+    table : `~astropy.table.Table`
+        Table with columns `"means"`, `"covariances"` and `"weights"`.
+    """
+    table = Table()
+
+    table["means"] = gmm.means_
+    table["covariances"] = gmm.covariances_
+    table["weights"] = gmm.weights_
+    return table
 
 
 def read_images(config, path_base):
@@ -112,14 +138,17 @@ def extract_patches(filename):
 
     stride = config["stride"]
     patch_shape = tuple(config["patch-shape"])
-    sigma = config["gaussian-smoothing"]
-    block_size = config["downsample-block-size"]
+    sigma = config.get("gaussian-smoothing")
+    block_size = config.get("downsample-block-size")
 
     for image in images * config.get("random-nrepeat", 1):
-        smoothed = gaussian_filter(image, sigma)
-        image_coarse = block_reduce(smoothed, block_size, func=np.mean)
+        if sigma:
+            image = gaussian_filter(image, sigma)
 
-        image_coarse = cycle_spin_subpixel_numpy(image_coarse, generator=GENERATOR)
+        if block_size:
+            image = block_reduce(image, block_size, func=np.mean)
+
+        image_coarse = cycle_spin_subpixel_numpy(image, generator=GENERATOR)
 
         image_coarse = image_coarse / np.nanmax(image_coarse)
         image_coarse = np.clip(image_coarse, 0, 1)
@@ -159,7 +188,7 @@ def learn_gmm(filename):
     patches = fits.getdata(filename_patches)
 
     log.info(f"Fitting GMM to {len(patches)} patches...")
-    gmm.fit(X=patches)
+    gmm.fit(X=patches.astype(np.float32))
 
     filename_gmm = filename.parent / config["filename"]
     table = sklearn_gmm_to_table(gmm=gmm)
