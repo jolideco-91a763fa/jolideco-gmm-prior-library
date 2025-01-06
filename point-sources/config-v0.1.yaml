@@ -1,0 +1,21 @@
+name: point-sources-v0.1
+pre-process-script: preprocess.py
+filename: point-sources-v0.1.fits.gz
+format: table
+extract-patches:
+    input-images: images/*.fits.gz
+    patch-shape: [8, 8]
+    stride: 2
+    filename: patches/patches-v0.1.fits.gz
+    patch-norm:
+        type: "std-subtract-mean"
+sklearn-gmm-kwargs:
+    n_components:   
+    warm_start: False
+    covariance_type: full
+    n_init: 1
+    tol: 0.001
+    max_iter: 500
+    init_params: 'kmeans'
+plots:
+    ncols: 16
