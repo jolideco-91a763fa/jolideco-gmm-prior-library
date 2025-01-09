@@ -19,3 +19,5 @@ dependencies:
   - requests
   - tqdm
   - jupyter
+  - pip:
+    - gmmx
